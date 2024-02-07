@@ -789,7 +789,7 @@ class TaskSetResults:
         baselines_metainfo)
 
 
-def WMT23(lps: list[str] | None = None, primary=True, k=0, gold=None, only_seg_level=False, item_for_seg_level_pearson=False):
+def WMT23(lps: list[str] | None = None, primary=True, k=0, gold=None, only_seg_level=False, item_for_seg_level_pearson=False, only_pearson=False):
   """Generate the WMT23 task set and associated weight vector."""
 
   # Not strictly necessary to declare this, because setting human=True will
@@ -820,8 +820,9 @@ def WMT23(lps: list[str] | None = None, primary=True, k=0, gold=None, only_seg_l
     if not only_seg_level:
       Add(lp, 'sys', 'pearson', human, gold)
     Add(lp, 'seg', 'pearson', human, gold, avg_by='item' if item_for_seg_level_pearson else 'none')
-    Add(lp, 'seg', 'KendallWithTiesOpt', human, gold,
-        avg_by='item', perm_test='pairs', corr_fcn_args={'sample_rate': 1.0})
+    if not only_pearson:
+      Add(lp, 'seg', 'KendallWithTiesOpt', human, gold,
+          avg_by='item', perm_test='pairs', corr_fcn_args={'sample_rate': 1.0})
 
   weights = [len(lps)] + [1] * (len(tasks) - 1) if not only_seg_level else [1] * len(tasks)
   weights = [w / sum(weights) for w in weights]
